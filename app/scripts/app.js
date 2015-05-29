@@ -18,13 +18,15 @@ angular.module('isbnStore', ['ionic','ngCordova','firebase'])
 		}
 	});
 })
-.controller('ExampleController', function($scope, $cordovaBarcodeScanner, $firebaseObject, IsbnService) {
-
+.controller('ExampleController', function($scope, $cordovaBarcodeScanner, $firebaseArray, IsbnService) {
+	var ref = new Firebase('https://isbnstore.firebaseio.com/books');
+	$scope.books = $firebaseArray(ref);
 	$scope.scanBarcode = function(from) {
 		$cordovaBarcodeScanner.scan().then(function(imageData) {
 
 			IsbnService.books.get[from](imageData.text).then(function(book){
 				window.alert(JSON.stringify(book));
+				$scope.books.$add(book[0].data.title);
 			});
 			console.log('Barcode Format -> ' + imageData.format);
 			console.log('Cancelled -> ' + imageData.cancelled);
