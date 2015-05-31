@@ -20,13 +20,28 @@ angular.module('isbnStore', ['ionic','ngCordova','firebase'])
 })
 .controller('ExampleController', function($scope, $cordovaBarcodeScanner, $firebaseArray, IsbnService) {
 	var ref = new Firebase('https://isbnstore.firebaseio.com/books');
+	var modifiedBook = {};
 	$scope.books = $firebaseArray(ref);
 	$scope.scanBarcode = function(from) {
 		$cordovaBarcodeScanner.scan().then(function(imageData) {
 
 			IsbnService.books.get[from](imageData.text).then(function(book){
-				window.alert(JSON.stringify(book));
-				$scope.books.$add(book[0].data.title);
+				window.alert('1 -->'+JSON.stringify(book));
+				if(from === 'fromISBNdb'){
+					modifiedBook = {
+						title: book.data[0].title,
+						publisher: book.data[0].publisher_name,
+						author: book.data[0].author_data[0] !== undefined && book.data[0].author_data[0] !== null ? book.data[0].author_data.name : ''
+					};
+				}
+				else if(from === 'fromOutpan'){
+					modifiedBook = {
+						title: book.name,
+						publisher: book.attributes['Publisher'],
+						author: book.attributes['Author(s)']
+					};
+				}
+				$scope.books.$add(modifiedBook);
 			});
 			console.log('Barcode Format -> ' + imageData.format);
 			console.log('Cancelled -> ' + imageData.cancelled);
